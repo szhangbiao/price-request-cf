@@ -1,0 +1,8 @@
+{
+	"name": "price-request-cf",
+	"main": "src/index.js",
+	"compatibility_date": "2025-07-25",
+	"observability": {
+		"enabled": true
+	}
+}
