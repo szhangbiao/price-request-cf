@@ -4,5 +4,16 @@
 	"compatibility_date": "2025-04-08",
 	"observability": {
 		"enabled": true
-	}
+	},
+	"vars": {
+		"GOLD_API_URL": "http://web.juhe.cn/finance/gold/shgold?v=1&key=",
+		"EXCHANGE_RATE_API_URL": "http://op.juhe.cn/onebox/exchange/currency?from=USD&to=CNY&version=2&key="
+	},
+	"kv_namespaces": [
+		{
+			"binding": "PRICE_DATA",
+			"id": "a63d3614c3a64c6ebd00777c1b676866",
+			"preview_id": "5188a577452e4cc99bf1a0d129223aa6"
+		}
+	]
 }
