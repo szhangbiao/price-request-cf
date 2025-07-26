@@ -2,3 +2,7 @@
 JUHE_GOLD_APPKEY= # 接口调用里appkey参数
 # 聚合数据汇率换算API密钥 请自行到平台注册获取
 JUHE_EXCHANGE_RATE_APPKEY= # 接口调用里appkey参数
+
+# Upstash Redis 配置（用于缓存价格数据）
+UPSTASH_REDIS_REST_URL= # Upstash Redis REST API URL
+UPSTASH_REDIS_REST_TOKEN= # Upstash Redis REST API Token
