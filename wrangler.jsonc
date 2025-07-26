@@ -1,6 +1,6 @@
 {
 	"name": "price-request-cf",
-	"main": "src/index.js",
+	"main": "src/index.tsx",
 	"compatibility_date": "2025-04-08",
 	"observability": {
 		"enabled": true
