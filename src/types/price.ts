@@ -60,6 +60,7 @@ export interface PriceData {
   gold?: GoldData;
   exchangeRate?: ExchangeRateData;
   stocks?: StockData[];
+  source?: string;
   updateTime: string;
 }
 

@@ -177,7 +177,7 @@ export class PriceService {
       }
 
       const priceData: PriceData = {
-        type: 1, // 可以根据需要设置类型
+        type: 2, // 可以根据需要设置类型
         updateTime: new Date().toISOString(), // 添加当前时间戳
       };
 

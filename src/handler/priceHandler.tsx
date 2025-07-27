@@ -33,7 +33,9 @@ export class PriceHandler {
         const redisData = await this.getFromRedis(key);
         if (redisData) {
           console.log('从 Redis 获取数据成功');
-          return redisData.data as PriceData;
+          const data = redisData.data as PriceData;
+          data.source = 'redis';
+          return data;
         }
 
         // 2. 从 KV 获取
@@ -43,7 +45,9 @@ export class PriceHandler {
           console.log('从 KV 获取数据成功，同时回写到 Redis');
           // 将 KV 数据回写到 Redis 以提高下次访问速度
           await this.saveToRedis(key, kvData.data, kvData.source);
-          return kvData.data as PriceData;
+          const data = kvData.data as PriceData;
+           data.source = 'kv';
+          return data;
         }
       }
 
@@ -57,6 +61,7 @@ export class PriceHandler {
           this.saveToRedis(key, apiData, 'api'),
           this.saveToKV(key, apiData, 'api')
         ]);
+        apiData.source = 'api';
         return apiData;
       }
 
@@ -244,6 +249,48 @@ export async function getPriceData(c: Context<{ Bindings: Env }>) {
     return c.json({
       success: false,
       message: '服务器内部错误',
+      error: error instanceof Error ? error.message : '未知错误',
+      timestamp: Date.now()
+    }, 500);
+  }
+}
+
+/**
+ * 导出的 clearCache 函数，用于 API 路由清除缓存
+ * @param c Hono Context 对象
+ * @returns JSON 响应
+ */
+export async function clearCache(c: Context<{ Bindings: Env }>) {
+  try {
+    const env = c.env;
+    const priceHandler = new PriceHandler(env);
+    
+    // 获取路径参数中的缓存键名
+    const key = c.req.param('key');
+    
+    if (key) {
+      // 清除指定键的缓存
+      await priceHandler.clearCache(key);
+      return c.json({
+        success: true,
+        message: `缓存清除成功: ${key}`,
+        key,
+        timestamp: Date.now()
+      });
+    } else {
+      // 清除所有缓存
+      await priceHandler.clearAllCache();
+      return c.json({
+        success: true,
+        message: '所有价格缓存清除成功',
+        timestamp: Date.now()
+      });
+    }
+  } catch (error) {
+    console.error('API 清除缓存失败:', error);
+    return c.json({
+      success: false,
+      message: '清除缓存失败',
       error: error instanceof Error ? error.message : '未知错误',
       timestamp: Date.now()
     }, 500);
