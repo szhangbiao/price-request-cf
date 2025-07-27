@@ -60,6 +60,7 @@ export interface PriceData {
   gold?: GoldData;
   exchangeRate?: ExchangeRateData;
   stocks?: StockData[];
+  updateTime: string;
 }
 
 // 通用价格数据接口（用于存储服务）

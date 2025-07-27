@@ -1,10 +1,20 @@
 import { Hono } from 'hono'
-import { authMiddleware } from '../middleware/auth'
+import { getPriceData } from '../handler/priceHandler'
+import { Env } from '../types/price'
 
+const api = new Hono<{ Bindings: Env }>()
 
-const api = new Hono()
+// 获取价格数据的主要接口
+api.get('/price/request', getPriceData)
 
-api.get('/price/request')
-api.get('/price/crawl')
+// 健康检查接口
+api.get('/health', (c) => {
+  return c.json({
+    success: true,
+    message: 'API 服务正常',
+    timestamp: Date.now(),
+    version: '1.0.0'
+  });
+})
 
 export default api

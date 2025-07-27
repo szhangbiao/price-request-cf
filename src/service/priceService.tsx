@@ -19,7 +19,7 @@ export class PriceService {
    * 获取黄金价格数据
    * @returns 黄金价格数据或null
    */
-  async getGoldPrice(): Promise<GoldData | null> {
+  private async getGoldPrice(): Promise<GoldData | null> {
     try {
       // 从环境变量获取API URL和密钥
       const url = `${this.env.GOLD_API_URL}${this.env.JUHE_GOLD_APPKEY}`;
@@ -53,7 +53,7 @@ export class PriceService {
    * 获取汇率数据
    * @returns 汇率数据或null
    */
-  async getExchangeRate(): Promise<ExchangeRateData | null> {
+  private async getExchangeRate(): Promise<ExchangeRateData | null> {
     try {
       // 从环境变量获取API URL和密钥
       const url = `${this.env.EXCHANGE_RATE_API_URL}${this.env.JUHE_EXCHANGE_RATE_APPKEY}`;
@@ -83,7 +83,7 @@ export class PriceService {
     }
   }
 
-  async getStockDatas(): Promise<StockData[] | null> {
+  private async getStockDatas(): Promise<StockData[] | null> {
     const stockCode = ["s_sh000001","s_sz399001","s_sz399006"];
     const baseUrl = "https://hq.sinajs.cn/list=";
     const stockDataList: StockData[] = [];
@@ -98,7 +98,8 @@ export class PriceService {
           method: 'GET',
           headers: {
             'Referer':'https://finance.sina.com.cn',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept-Charset': 'GBK,utf-8;q=0.7,*;q=0.3'
           }
         });
 
@@ -106,7 +107,23 @@ export class PriceService {
           console.error(`获取股票 ${code} 数据失败: HTTP ${response.status}`);
           continue;
         }
-        const textData = await response.text();
+
+        // 获取原始字节数据
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // 尝试使用GBK解码，如果不支持则使用UTF-8
+        let textData: string;
+        try {
+          // 在Cloudflare Workers环境中，我们需要手动处理GBK编码
+          const decoder = new TextDecoder('gbk');
+          textData = decoder.decode(arrayBuffer);
+        } catch (error) {
+          // 如果GBK解码失败，回退到UTF-8
+          console.warn(`GBK解码失败，使用UTF-8解码: ${error}`);
+          const decoder = new TextDecoder('utf-8');
+          textData = decoder.decode(arrayBuffer);
+        }
+
         // 解析新浪财经API返回的数据格式
         // 格式: var hq_str_s_sh000001="上证指数,3000.00,10.00,0.33,1000000,100000000";
         const match = textData.match(/="([^"]+)"/);
@@ -122,7 +139,10 @@ export class PriceService {
               amount: parseInt(dataArray[5]) || 0,
             };
             stockDataList.push(stockData);
+            console.log(`成功解析股票数据: ${stockData.name}`);
           }
+        } else {
+          console.warn(`无法解析股票 ${code} 的数据格式`);
         }
       }
 
@@ -157,7 +177,8 @@ export class PriceService {
       }
 
       const priceData: PriceData = {
-        type: 1 // 可以根据需要设置类型
+        type: 1, // 可以根据需要设置类型
+        updateTime: new Date().toISOString(), // 添加当前时间戳
       };
 
       // 只添加成功获取的数据

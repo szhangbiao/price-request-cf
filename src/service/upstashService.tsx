@@ -36,6 +36,29 @@ export class UpstashService {
   }
 
   /**
+   * 保存数据并设置自定义TTL
+   * @param key 存储键
+   * @param data 数据内容
+   * @param source 数据来源
+   * @param customTTL 自定义过期时间（秒）
+   */
+  async savePriceWithTTL(key: string, data: any, source: string, customTTL: number): Promise<void> {
+    try {
+      const priceData: PriceStorage = {
+        timestamp: Date.now(),
+        data,
+        source
+      };
+      
+      // 将数据存储到Redis，设置自定义过期时间
+      await this.redis.setex(key, customTTL, JSON.stringify(priceData));
+    } catch (error) {
+      console.error('保存数据到Redis失败:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 从Redis获取价格数据
    * @param key 存储键
    * @returns 价格数据或null
