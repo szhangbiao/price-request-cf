@@ -21,7 +21,7 @@ const GoldCard: FC<GoldCardProps> = ({ gold }) => {
       <div class="price-info">
         <div class="main-price">
           <span class="label">最新价:</span>
-          <span class="value">¥{formatNumber(gold.latestpri)}</span>
+          <span class="value">¥ {formatNumber(gold.latestpri)}</span>
         </div>
         <div class="price-details">
           <div class="detail-item">

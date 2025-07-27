@@ -3,7 +3,7 @@ import type { PriceData } from '../../types/price'
 import GoldCard from '../cards/GoldCard'
 import ExchangeRateCard from '../cards/ExchangeRateCard'
 import StocksCard from '../cards/StocksCard'
-import Header from '../layout/Header'
+import Header from './Header'
 import { homeStyles } from './homeStyles'
 import { formatTime } from '../../utils/timeUtils'
 

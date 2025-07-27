@@ -17,7 +17,7 @@ router.get('/', async (c) => {
     const priceData = await priceHandler.getPriceData()
     
     return c.html(
-      <Layout>
+      <Layout currentPath="/">
         <Home priceData={priceData} />
       </Layout>
     )
@@ -25,12 +25,12 @@ router.get('/', async (c) => {
     console.error('获取价格数据失败:', error)
     
     return c.html(
-      <Layout>
+      <Layout currentPath="/">
         <Home error={error instanceof Error ? error.message : '获取价格数据时发生未知错误'} />
       </Layout>
     )
   }
 })
-router.get('/about', (c) => c.html(<Layout><About /></Layout>))
+router.get('/about', (c) => c.html(<Layout currentPath="/about"><About /></Layout>))
 
 export default router

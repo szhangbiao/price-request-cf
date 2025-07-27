@@ -191,6 +191,12 @@ export const homeStyles = `
       justify-content: center;
     }
 
+    .source-info {
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+    }
+
     .error-message, .loading-message {
       padding: 30px 15px;
     }
@@ -211,6 +217,12 @@ export const homeStyles = `
       gap: 10px;
       flex-direction: column;
       justify-content: center;
+    }
+
+    .source-info {
+      flex-direction: column;
+      gap: 6px;
+      text-align: center;
     }
 
     .source-value {
