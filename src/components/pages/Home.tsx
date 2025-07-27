@@ -2,6 +2,7 @@ import type { FC } from 'hono/jsx'
 import type { PriceData } from '../../types/price'
 import { ExchangeRateCard, GoldCard, StocksCard, HomeSkeleton } from '../cards';
 import Header from './Header'
+import ErrorMessage from './ErrorMessage'
 import { homeStyles } from './homeStyles'
 import { formatTime } from '../../utils/timeUtils'
 
@@ -17,12 +18,7 @@ const Home: FC<HomeProps> = ({ priceData, error }) => {
 
       <Header />
 
-      {error && (
-        <div class="error-message">
-          <h3>❌ 获取数据失败</h3>
-          <p>{error}</p>
-        </div>
-      )}
+      {error && <ErrorMessage error={error} />}
 
       {priceData ? (
         <div class="price-dashboard">

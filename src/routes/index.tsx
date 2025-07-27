@@ -18,7 +18,7 @@ router.get('/', async (c) => {
     
     return c.html(
       <Layout currentPath="/">
-        <Home priceData={priceData} />
+        <Home error={'获取价格数据时发生未知错误'} />
       </Layout>
     )
   } catch (error) {
