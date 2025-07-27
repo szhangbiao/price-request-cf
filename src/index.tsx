@@ -14,6 +14,7 @@ import { cors } from 'hono/cors'
 
 import mainRouter from './routes/index'
 import apiRouter from './routes/api'
+import staticRouter from './routes/static'
 
 const app = new Hono()
 
@@ -22,8 +23,9 @@ app.use('*', logger())
 app.use('*', cors())
 
 // 挂载路由
-app.route('/', mainRouter)
-app.route('/api', apiRouter)
+app.route('/', staticRouter)  // 静态资源路由
+app.route('/', mainRouter)    // 主页面路由
+app.route('/api', apiRouter)  // API 路由
 
 // 导出默认应用
 export default app

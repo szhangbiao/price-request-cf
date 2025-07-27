@@ -193,6 +193,45 @@ export class PriceHandler {
   }
 
   /**
+   * 从请求 body 中获取 PriceData 并缓存到 Redis 和 KV
+   * @param priceData 价格数据
+   * @param key 缓存键名，默认为 request_data
+   * @returns 是否保存成功
+   */
+  async savePriceDataFromBody(priceData: PriceData, key: string = KEY_REQUEST_DATA): Promise<boolean> {
+    try {
+      console.log(`开始保存价格数据到缓存，键名: ${key}`);
+      
+      // 验证数据格式
+      if (!priceData || typeof priceData !== 'object') {
+        console.error('无效的价格数据格式');
+        return false;
+      }
+
+      // 添加或更新时间戳
+      const dataToSave = {
+        ...priceData,
+        updateTime: new Date().toISOString(),
+        source: 'manual' // 标记为手动上传的数据
+      };
+
+      console.log('验证数据格式成功，开始保存到缓存...');
+
+      // 同时保存到 Redis 和 KV
+      await Promise.all([
+        this.saveToRedis(key, dataToSave, 'manual'),
+        this.saveToKV(key, dataToSave, 'manual')
+      ]);
+
+      console.log(`价格数据保存成功，键名: ${key}`);
+      return true;
+    } catch (error) {
+      console.error('保存价格数据失败:', error);
+      return false;
+    }
+  }
+
+  /**
    * 获取缓存状态信息
    */
   async getCacheStatus(key: string): Promise<{
@@ -216,6 +255,62 @@ export class PriceHandler {
       console.error('获取缓存状态失败:', error);
       return { redis: false, kv: false };
     }
+  }
+}
+
+/**
+ * 导出的 savePriceData 函数，用于 API 路由保存价格数据
+ * @param c Hono Context 对象
+ * @returns JSON 响应
+ */
+export async function savePriceData(c: Context<{ Bindings: Env }>) {
+  try {
+    const env = c.env;
+    const priceHandler = new PriceHandler(env);
+    
+    // 从请求 body 中获取价格数据
+    const requestBody = await c.req.json();
+    
+    // 验证请求体是否包含有效的价格数据
+    if (!requestBody || !requestBody.data) {
+      return c.json({
+        success: false,
+        message: '请求体缺少价格数据',
+        timestamp: Date.now()
+      }, 400);
+    }
+
+    const priceData = requestBody.data as PriceData;
+    
+    // 获取可选的缓存键名，默认为 request_data
+    const key = requestBody.key || KEY_REQUEST_DATA;
+    
+    // 保存价格数据到缓存
+    const success = await priceHandler.savePriceDataFromBody(priceData, key);
+    
+    if (success) {
+      return c.json({
+        success: true,
+        message: '价格数据保存成功',
+        key,
+        timestamp: Date.now()
+      });
+    } else {
+      return c.json({
+        success: false,
+        message: '价格数据保存失败',
+        key,
+        timestamp: Date.now()
+      }, 500);
+    }
+  } catch (error) {
+    console.error('API 保存价格数据失败:', error);
+    return c.json({
+      success: false,
+      message: '保存价格数据失败',
+      error: error instanceof Error ? error.message : '未知错误',
+      timestamp: Date.now()
+    }, 500);
   }
 }
 
