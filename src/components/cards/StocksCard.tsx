@@ -14,7 +14,7 @@ const StocksCard: FC<StocksCardProps> = ({ stocks }) => {
 
   // 格式化百分比显示
   const formatPercent = (num: number): string => {
-    return `${num > 0 ? '+' : ''}${num.toFixed(2)}%`;
+    return `${num.toFixed(2)}%`;
   };
 
   return (
@@ -29,7 +29,7 @@ const StocksCard: FC<StocksCardProps> = ({ stocks }) => {
             <div class="stock-price">
               <span class="current">{formatNumber(stock.current)}</span>
               <span class={`change ${stock.change >= 0 ? 'positive' : 'negative'}`}>
-                {stock.change >= 0 ? '+' : ''}{formatNumber(stock.change)}
+                {formatNumber(stock.change)}
               </span>
               <span class={`percent ${stock.percent >= 0 ? 'positive' : 'negative'}`}>
                 {formatPercent(stock.percent)}

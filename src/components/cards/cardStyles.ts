@@ -20,6 +20,19 @@ export const cardStyles = `
     border-left-color: #f39c12;
   }
 
+  .gold-price {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+  .gold-price .percent {
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
   .exchange-card {
     border-left-color: #3498db;
   }
@@ -196,24 +209,24 @@ export const cardStyles = `
   }
 
   .positive {
-    background-color: #d4edda;
-    color: #155724;
-  }
-
-  .negative {
     background-color: #f8d7da;
     color: #721c24;
   }
 
+  .negative {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
   /* 暗色主题涨跌颜色 */
   body.dark-theme .positive {
-    background-color: #1e4d2b;
-    color: #4ade80;
+    background-color: #4d1e1e;
+    color: #f87171;
   }
 
   body.dark-theme .negative {
-    background-color: #4d1e1e;
-    color: #f87171;
+    background-color: #1e4d2b;
+    color: #4ade80;
   }
 
   .stock-volume {

@@ -13,6 +13,12 @@ const GoldCard: FC<GoldCardProps> = ({ gold }) => {
     return isNaN(value) ? '0.00' : value.toFixed(2);
   };
 
+  // 判断涨跌幅是正数还是负数
+  const isPositive = () => {
+    if (!gold.limit) return false;
+    return !gold.limit.includes('-');
+  };
+
   return (
     <div class="price-card gold-card">
       <style>{cardStyles}</style>
@@ -21,7 +27,14 @@ const GoldCard: FC<GoldCardProps> = ({ gold }) => {
       <div class="price-info">
         <div class="main-price">
           <span class="label">最新价:</span>
-          <span class="value">¥ {formatNumber(gold.latestpri)}</span>
+          <div  class="gold-price">
+            <span class="value">¥ {formatNumber(gold.latestpri)}</span>
+                {gold.limit && (
+                    <span class={`percent ${isPositive() ? 'positive' : 'negative'}`}>
+                    {gold.limit}
+                    </span>
+                )}
+            </div>
         </div>
         <div class="price-details">
           <div class="detail-item">
