@@ -9,18 +9,23 @@ import { formatTime } from '../../utils/timeUtils'
 interface HomeProps {
   priceData?: PriceData | null;
   error?: string;
+  showSkeleton?: boolean;
 }
 
-const Home: FC<HomeProps> = ({ priceData, error }) => {
+const Home: FC<HomeProps> = ({ priceData, error, showSkeleton = false }) => {
   return (
     <div class="home-container">
       <style>{homeStyles}</style>
 
       <Header />
-
+      {/* 显示错误信息 */}
       {error && <ErrorMessage error={error} />}
 
-      {priceData ? (
+      {/* 显示骨架屏 */}
+      {showSkeleton && <HomeSkeleton />}
+
+      {/* 显示真实数据 */}
+      {priceData && !showSkeleton && (
         <div class="price-dashboard">
           <div class="price-grid">
             {priceData.gold && <GoldCard gold={priceData.gold} />}
@@ -38,11 +43,6 @@ const Home: FC<HomeProps> = ({ priceData, error }) => {
               <span class="time-value">{formatTime(priceData.updateTime)}</span>
             </div>
           </div>
-        </div>
-      ) : !error && (
-        <div class="loading-message">
-          <h3>⏳ 正在加载价格数据...</h3>
-          <p>请稍候，正在从缓存或API获取最新数据</p>
         </div>
       )}
     </div>
