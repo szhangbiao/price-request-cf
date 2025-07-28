@@ -24,7 +24,6 @@ export const cardStyles = `
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 5px;
   }
   .gold-price .percent {
     font-weight: bold;

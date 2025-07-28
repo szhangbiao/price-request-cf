@@ -9,8 +9,8 @@ const Footer: FC = () => {
         <div class="footer-links">
           <a href="/">首页</a>
           <a href="/about">关于</a>
-          <a href="/api/prices">API</a>
-          <a href="https://github.com" target="_blank">GitHub</a>
+          <a href="https://www.juhe.cn/">API</a>
+          <a href="https://github.com/szhangbiao/price-request-cf" target="_blank">GitHub</a>
         </div>
         <p>© 2025 Price Demo - 实时价格数据服务</p>
       </div>

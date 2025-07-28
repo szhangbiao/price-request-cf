@@ -115,19 +115,10 @@ export class PriceHandler {
    */
   private async saveToRedis(key: string, data: any, source: string): Promise<void> {
     try {
-      // 获取当前时间
-      const now = new Date();
-      const dayOfWeek = now.getDay(); // 0=周日, 1=周一, ..., 6=周六
-      
-      // 判断是否为周末（周六或周日）
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      
       // 设置缓存时间（秒）
-      const cacheTTL = isWeekend 
-        ? 24 * 60 * 60  // 周末：24小时 = 86400秒
-        : 1 * 60 * 60;  // 工作日：1小时 = 3600秒
+      const cacheTTL = 24 * 60 * 60
       
-      console.log(`保存数据到 Redis，当前是${isWeekend ? '周末' : '工作日'}，缓存时间: ${cacheTTL}秒`);
+      console.log(`保存数据到 Redis，缓存时间: ${cacheTTL}秒`);
       
       // 使用自定义TTL保存数据
       await this.upstashService.savePriceWithTTL(key, data, source, cacheTTL);
@@ -141,20 +132,11 @@ export class PriceHandler {
    * 工作日缓存1小时，周末缓存1天
    */
   private async saveToKV(key: string, data: any, source: string): Promise<void> {
-    try {
-      // 获取当前时间
-      const now = new Date();
-      const dayOfWeek = now.getDay(); // 0=周日, 1=周一, ..., 6=周六
-      
-      // 判断是否为周末（周六或周日）
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      
+    try {  
       // 设置缓存时间（秒）
-      const cacheTTL = isWeekend 
-        ? 24 * 60 * 60  // 周末：24小时 = 86400秒
-        : 1 * 60 * 60;  // 工作日：1小时 = 3600秒
+      const cacheTTL = 24 * 60 * 60
       
-      console.log(`保存数据到 KV，当前是${isWeekend ? '周末' : '工作日'}，缓存时间: ${cacheTTL}秒`);
+      console.log(`保存数据到 KV，缓存时间: ${cacheTTL}秒`);
       
       // 使用自定义TTL保存数据
       await this.kvService.savePriceWithTTL(key, data, source, cacheTTL);
