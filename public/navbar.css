@@ -127,17 +127,18 @@
   height: 100%;
 }
 
+/* 修正：白色主题时显示月亮图标 */
 .dark-icon {
-  opacity: 0;
-  transform: rotate(180deg);
-}
-
-.light-icon {
   opacity: 1;
   transform: rotate(0deg);
 }
 
-/* 暗色主题导航栏 */
+.light-icon {
+  opacity: 0;
+  transform: rotate(180deg);
+}
+
+/* 暗色主题导航栏 - 修改选择器 */
 body.dark-theme .navbar {
   background: #1a1a1a;
   color: #e0e0e0;
@@ -186,14 +187,15 @@ body.dark-theme .theme-toggle:hover .theme-icon {
   color: #4dabf7;
 }
 
+/* 修正：暗色主题时显示太阳图标 */
 body.dark-theme .dark-icon {
-  opacity: 1;
-  transform: rotate(0deg);
+  opacity: 0;
+  transform: rotate(-180deg);
 }
 
 body.dark-theme .light-icon {
-  opacity: 0;
-  transform: rotate(-180deg);
+  opacity: 1;
+  transform: rotate(0deg);
 }
 
 /* 响应式导航栏 */

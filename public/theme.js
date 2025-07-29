@@ -11,20 +11,21 @@
     };
 
     // 防闪烁：立即应用保存的主题
-    function applyThemeImmediately() {
+    // 防闪烁：立即应用保存的主题
+    function applyThemeImmediately () {
         const savedTheme = localStorage.getItem(CONFIG.STORAGE_KEY);
         const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         const theme = savedTheme || (systemPrefersDark ? "dark" : CONFIG.DEFAULT_THEME);
-        
+
         if (theme === "dark") {
-            document.documentElement.classList.add(CONFIG.THEME_CLASS);
+            document.body.classList.add(CONFIG.THEME_CLASS);
         }
     }
 
     // 主题切换函数
-    function toggleTheme() {
+    function toggleTheme () {
         try {
-            const body = document.body;
+            const body = document.body;  // 改回使用body
             const currentTheme = getCurrentTheme();
             const newTheme = currentTheme === "light" ? "dark" : "light";
 
@@ -46,8 +47,8 @@
             }, CONFIG.TRANSITION_DURATION);
 
             // 触发自定义事件
-            window.dispatchEvent(new CustomEvent('themeChanged', { 
-                detail: { theme: newTheme } 
+            window.dispatchEvent(new CustomEvent('themeChanged', {
+                detail: { theme: newTheme }
             }));
 
         } catch (error) {
@@ -56,12 +57,12 @@
     }
 
     // 获取当前主题
-    function getCurrentTheme() {
+    function getCurrentTheme () {
         return localStorage.getItem(CONFIG.STORAGE_KEY) || CONFIG.DEFAULT_THEME;
     }
 
     // 更新主题图标
-    function updateThemeIcon(theme) {
+    function updateThemeIcon (theme) {
         const lightIcon = document.querySelector(".light-icon");
         const darkIcon = document.querySelector(".dark-icon");
 
@@ -91,10 +92,10 @@
     }
 
     // 监听系统主题变化
-    function watchSystemTheme() {
+    function watchSystemTheme () {
         if (window.matchMedia) {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            
+
             // 只有在用户没有手动设置主题时才跟随系统
             mediaQuery.addEventListener('change', (e) => {
                 if (!localStorage.getItem(CONFIG.STORAGE_KEY)) {
@@ -106,30 +107,31 @@
     }
 
     // 应用主题
-    function applyTheme(theme) {
-        const body = document.body;
-        
+    function applyTheme (theme) {
+        const body = document.body;  // 改回使用body
+
         if (theme === "dark") {
             body.classList.add(CONFIG.THEME_CLASS);
         } else {
             body.classList.remove(CONFIG.THEME_CLASS);
         }
-        
+
         updateThemeIcon(theme);
     }
 
     // 初始化主题
-    function initTheme() {
+    function initTheme () {
         try {
             const savedTheme = getCurrentTheme();
             const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
+
             // 如果没有保存的主题，使用系统偏好
-            const theme = localStorage.getItem(CONFIG.STORAGE_KEY) || 
-                         (systemPrefersDark ? "dark" : CONFIG.DEFAULT_THEME);
-            
+            const theme = localStorage.getItem(CONFIG.STORAGE_KEY) ||
+                (systemPrefersDark ? "dark" : CONFIG.DEFAULT_THEME);
+
+            // 确保主题状态正确（head脚本可能已经应用了）
             applyTheme(theme);
-            
+
             // 如果是首次访问，保存检测到的主题偏好
             if (!localStorage.getItem(CONFIG.STORAGE_KEY)) {
                 localStorage.setItem(CONFIG.STORAGE_KEY, theme);
@@ -137,7 +139,7 @@
 
             // 绑定主题切换按钮事件（支持多种选择器）
             const selectors = [".theme-toggle", "#theme-toggle-btn", "[data-theme-toggle]"];
-            
+
             selectors.forEach(selector => {
                 const elements = document.querySelectorAll(selector);
                 elements.forEach(element => {
@@ -161,9 +163,6 @@
             console.error('主题初始化失败:', error);
         }
     }
-
-    // 立即应用主题防止闪烁
-    applyThemeImmediately();
 
     // 当 DOM 加载完成后完整初始化
     if (document.readyState === "loading") {
