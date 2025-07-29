@@ -1,18 +1,16 @@
 import type { FC } from 'hono/jsx'
-import { footerStyles } from './footerStyles'
 
 const Footer: FC = () => {
   return (
     <footer>
-      <style>{footerStyles}</style>
       <div class="footer-content">
         <div class="footer-links">
-          <a href="/">首页</a>
-          <a href="/about">关于</a>
-          <a href="https://www.juhe.cn/">API</a>
-          <a href="https://github.com/szhangbiao/price-request-cf" target="_blank">GitHub</a>
+          <a href="/" class="footer-link">首页</a>
+          <a href="/about" class="footer-link">关于</a>
+          <a href="https://www.juhe.cn/" class="footer-link">API</a>
+          <a href="https://github.com/szhangbiao/price-request-cf" target="_blank" class="footer-link">GitHub</a>
         </div>
-        <p>© 2025 Price Demo - 实时价格数据服务</p>
+        <p class="footer-text">© 2025 Price Demo - 实时价格数据服务</p>
       </div>
     </footer>
   )

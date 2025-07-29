@@ -1,5 +1,4 @@
 import type { FC } from 'hono/jsx'
-import { navbarStyles } from './navbarStyles'
 
 interface NavbarProps {
   title?: string;
@@ -19,8 +18,6 @@ const Navbar: FC<NavbarProps> = ({
 }) => {
   return (
     <header class="navbar">
-      <style>{navbarStyles}</style>
-      
       <div class="navbar-container">
         <div class="navbar-brand">
           <a href="/" class="brand-link">

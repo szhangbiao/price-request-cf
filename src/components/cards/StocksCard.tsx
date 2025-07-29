@@ -1,6 +1,5 @@
 import type { FC } from 'hono/jsx'
 import type { StockData } from '../../types/price'
-import { cardStyles } from './cardStyles'
 
 interface StocksCardProps {
   stocks: StockData[];
@@ -19,7 +18,6 @@ const StocksCard: FC<StocksCardProps> = ({ stocks }) => {
 
   return (
     <div class="price-card stocks-card">
-      <style>{cardStyles}</style>
 
       <h3><i class="fas fa-chart-line"></i> 股票指数</h3>
       <div class="stocks-list">

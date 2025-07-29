@@ -3,7 +3,6 @@ import type { PriceData } from '../../types/price'
 import { ExchangeRateCard, GoldCard, StocksCard, HomeSkeleton } from '../cards';
 import Header from './Header'
 import ErrorMessage from './ErrorMessage'
-import { homeStyles } from './homeStyles'
 import { formatTime } from '../../utils/timeUtils'
 
 interface HomeProps {
@@ -15,7 +14,6 @@ interface HomeProps {
 const Home: FC<HomeProps> = ({ priceData, error, showSkeleton = false }) => {
   return (
     <div class="home-container">
-      <style>{homeStyles}</style>
 
       <Header />
       {/* 显示错误信息 */}

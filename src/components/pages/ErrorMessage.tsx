@@ -1,5 +1,4 @@
 import type { FC } from 'hono/jsx'
-import { errorMessageStyles } from './errorMessageStyles'
 
 interface ErrorMessageProps {
   error: string;
@@ -16,7 +15,6 @@ const ErrorMessage: FC<ErrorMessageProps> = ({
 }) => {
   return (
     <div class="error-container">
-      <style>{errorMessageStyles}</style>
       
       <div class="error-header">
         <div class="error-icon">❌</div>

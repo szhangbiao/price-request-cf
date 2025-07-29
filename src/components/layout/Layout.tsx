@@ -1,7 +1,6 @@
 import type { FC } from 'hono/jsx'
 import Navbar from './Navbar'
 import Footer from './Footer'
-import { layoutStyles } from './layoutStyles'
 
 interface LayoutProps {
   currentPath?: string;
@@ -22,7 +21,13 @@ const Layout: FC<LayoutProps> = ({ children, currentPath = '/' }) => {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-        <style>{layoutStyles}</style>
+        {/* 分模块引入CSS文件 */}
+        <link rel="stylesheet" href="/global.css" />
+        <link rel="stylesheet" href="/navbar.css" />
+        <link rel="stylesheet" href="/cards.css" />
+        <link rel="stylesheet" href="/pages.css" />
+        <link rel="stylesheet" href="/components.css" />
+        <link rel="stylesheet" href="/responsive.css" />
       </head>
       <body>
         <Navbar links={navLinks} />

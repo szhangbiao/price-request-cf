@@ -1,6 +1,5 @@
 import type { FC } from 'hono/jsx'
 import type { GoldData } from '../../types/price'
-import { cardStyles } from './cardStyles'
 
 interface GoldCardProps {
   gold: GoldData;
@@ -21,7 +20,6 @@ const GoldCard: FC<GoldCardProps> = ({ gold }) => {
 
   return (
     <div class="price-card gold-card">
-      <style>{cardStyles}</style>
 
       <h3><i class="fas fa-coins"></i> 黄金价格 ({gold.variety})</h3>
       <div class="price-info">

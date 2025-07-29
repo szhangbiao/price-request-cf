@@ -1,11 +1,9 @@
 import type { FC } from 'hono/jsx'
 import Header from './Header'
-import { aboutStyles } from './aboutStyles'
 
 const About: FC = () => {
   return (
     <div class="about-container">
-      <style>{aboutStyles}</style>
 
       <Header 
         title="关于我们" 

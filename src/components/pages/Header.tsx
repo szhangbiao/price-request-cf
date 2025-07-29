@@ -1,5 +1,4 @@
 import type { FC } from 'hono/jsx'
-import { headerStyles } from './headerStyles'
 
 interface HeaderProps {
   title?: string;
@@ -12,7 +11,6 @@ const Header: FC<HeaderProps> = ({
 }) => {
   return (
     <div class="page-header">
-      <style>{headerStyles}</style>
       <h2 class="header-title">{title}</h2>
       <p class="header-subtitle">{subtitle}</p>
     </div>

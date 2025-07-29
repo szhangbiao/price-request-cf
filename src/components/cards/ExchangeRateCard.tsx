@@ -1,6 +1,5 @@
 import type { FC } from 'hono/jsx'
 import type { ExchangeRateData } from '../../types/price'
-import { cardStyles } from './cardStyles'
 
 interface ExchangeRateCardProps {
   exchangeRate: ExchangeRateData;
@@ -15,7 +14,6 @@ const ExchangeRateCard: FC<ExchangeRateCardProps> = ({ exchangeRate }) => {
 
   return (
     <div class="price-card exchange-card">
-      <style>{cardStyles}</style>
 
       <h3><i class="fas fa-exchange-alt"></i> 汇率信息</h3>
       <div class="price-info">
