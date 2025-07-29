@@ -21,23 +21,6 @@ const Layout: FC<LayoutProps> = ({ children, currentPath = '/' }) => {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-        {/* 防闪烁脚本 - 使用body元素 */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              try {
-                const savedTheme = localStorage.getItem('theme');
-                const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-                if (theme === 'dark') {
-                  document.body.classList.add('dark-theme');
-                }
-              } catch (e) {
-                // 静默处理错误
-              }
-            })();
-          `
-        }} />
         {/* 分模块引入CSS文件 */}
         <link rel="stylesheet" href="/global.css" />
         <link rel="stylesheet" href="/navbar.css" />
@@ -47,6 +30,34 @@ const Layout: FC<LayoutProps> = ({ children, currentPath = '/' }) => {
         <link rel="stylesheet" href="/responsive.css" />
       </head>
       <body>
+        {/* 防闪烁脚本移到body开始处 */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                const savedTheme = localStorage.getItem('theme');
+                const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+                if (theme === 'dark') {
+                  document.body.classList.add('dark-theme');
+                  // 立即设置图标状态
+                  setTimeout(() => {
+                    const darkIcon = document.querySelector('.dark-icon');
+                    const lightIcon = document.querySelector('.light-icon');
+                    if (darkIcon && lightIcon) {
+                      darkIcon.style.opacity = '0';
+                      darkIcon.style.transform = 'rotate(-180deg)';
+                      lightIcon.style.opacity = '1';
+                      lightIcon.style.transform = 'rotate(0deg)';
+                    }
+                  }, 0);
+                }
+              } catch (e) {
+                // 静默处理错误
+              }
+            })();
+          `
+        }} />
         <Navbar links={navLinks} />
         <main>{children}</main>
         <Footer />

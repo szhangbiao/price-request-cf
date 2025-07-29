@@ -138,7 +138,7 @@
   transform: rotate(180deg);
 }
 
-/* 暗色主题导航栏 - 修改选择器 */
+/* 暗色主题导航栏 - 修改为body选择器 */
 body.dark-theme .navbar {
   background: #1a1a1a;
   color: #e0e0e0;

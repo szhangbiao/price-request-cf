@@ -13,7 +13,7 @@ body {
   transition: all 0.3s ease;
 }
 
-/* 暗色主题全局样式 - 修改选择器 */
+/* 暗色主题全局样式 */
 body.dark-theme {
   background: #121212;
   color: #e0e0e0;
