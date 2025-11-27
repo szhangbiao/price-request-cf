@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { getPriceData, savePriceData, clearCache } from '../handler/priceHandler'
+import { sendEmail } from '../handler/emailHandler'
 import { Env } from '../types/price'
 
 const api = new Hono<{ Bindings: Env }>()
@@ -8,6 +9,9 @@ const api = new Hono<{ Bindings: Env }>()
 api.get('/price/request', getPriceData)
 api.post('/price/post', savePriceData)
 api.delete('/clearCache', clearCache)
+
+// 邮件测试接口
+api.get('/email', sendEmail)
 
 // 健康检查接口
 api.get('/health', (c) => {

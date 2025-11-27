@@ -46,7 +46,7 @@ export class PriceHandler {
           // 将 KV 数据回写到 Redis 以提高下次访问速度
           await this.saveToRedis(key, kvData.data, kvData.source);
           const data = kvData.data as PriceData;
-           data.source = 'kv';
+          data.source = 'kv';
           return data;
         }
       }
@@ -117,9 +117,9 @@ export class PriceHandler {
     try {
       // 设置缓存时间（秒）
       const cacheTTL = 24 * 60 * 60
-      
+
       console.log(`保存数据到 Redis，缓存时间: ${cacheTTL}秒`);
-      
+
       // 使用自定义TTL保存数据
       await this.upstashService.savePriceWithTTL(key, data, source, cacheTTL);
     } catch (error) {
@@ -132,12 +132,12 @@ export class PriceHandler {
    * 工作日缓存1小时，周末缓存1天
    */
   private async saveToKV(key: string, data: any, source: string): Promise<void> {
-    try {  
+    try {
       // 设置缓存时间（秒）
       const cacheTTL = 24 * 60 * 60
-      
+
       console.log(`保存数据到 KV，缓存时间: ${cacheTTL}秒`);
-      
+
       // 使用自定义TTL保存数据
       await this.kvService.savePriceWithTTL(key, data, source, cacheTTL);
     } catch (error) {
@@ -183,7 +183,7 @@ export class PriceHandler {
   async savePriceDataFromBody(priceData: PriceData, key: string = KEY_REQUEST_DATA): Promise<boolean> {
     try {
       console.log(`开始保存价格数据到缓存，键名: ${key}`);
-      
+
       // 验证数据格式
       if (!priceData || typeof priceData !== 'object') {
         console.error('无效的价格数据格式');
@@ -249,10 +249,10 @@ export async function savePriceData(c: Context<{ Bindings: Env }>) {
   try {
     const env = c.env;
     const priceHandler = new PriceHandler(env);
-    
+
     // 从请求 body 中获取价格数据
     const requestBody = await c.req.json();
-    
+
     // 验证请求体是否包含有效的价格数据
     if (!requestBody || !requestBody.data) {
       return c.json({
@@ -263,13 +263,13 @@ export async function savePriceData(c: Context<{ Bindings: Env }>) {
     }
 
     const priceData = requestBody.data as PriceData;
-    
+
     // 获取可选的缓存键名，默认为 request_data
     const key = requestBody.key || KEY_REQUEST_DATA;
-    
+
     // 保存价格数据到缓存
     const success = await priceHandler.savePriceDataFromBody(priceData, key);
-    
+
     if (success) {
       return c.json({
         success: true,
@@ -305,13 +305,13 @@ export async function getPriceData(c: Context<{ Bindings: Env }>) {
   try {
     const env = c.env;
     const priceHandler = new PriceHandler(env);
-    
+
     const data = await priceHandler.getPriceData();
-    
+
     if (data) {
       return c.json({
         success: true,
-        message:'获取价格数据成功',
+        message: '获取价格数据成功',
         data,
       });
     } else {
@@ -341,10 +341,10 @@ export async function clearCache(c: Context<{ Bindings: Env }>) {
   try {
     const env = c.env;
     const priceHandler = new PriceHandler(env);
-    
+
     // 获取路径参数中的缓存键名
     const key = c.req.param('key');
-    
+
     if (key) {
       // 清除指定键的缓存
       await priceHandler.clearCache(key);
