@@ -5,6 +5,7 @@ import { cors } from 'hono/cors';
 import staticRouter from './routes/static';
 import mainRouter from './routes/index';
 import apiRouter from './routes/api';
+import { PriceHandler } from './handler/priceHandler';
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -17,4 +18,30 @@ app.route('/', staticRouter);  // 静态资源路由（优先级最高）
 app.route('/', mainRouter);    // 主页面路由
 app.route('/api', apiRouter);  // API 路由
 
-export default app;
+// 导出 Worker 的处理器
+export default {
+    // HTTP 请求处理器
+    fetch: app.fetch,
+
+    // 定时任务处理器
+    async scheduled(event: ScheduledEvent, env: CloudflareBindings, ctx: ExecutionContext) {
+        console.log('定时任务触发，开始刷新价格数据...');
+        console.log('触发时间:', new Date(event.scheduledTime).toISOString());
+
+        try {
+            const priceHandler = new PriceHandler(env);
+
+            // 强制刷新价格数据（跳过缓存，从 API 获取最新数据）
+            const data = await priceHandler.getPriceData('request_data', true);
+
+            if (data) {
+                console.log('定时任务执行成功，价格数据已更新');
+                console.log('数据来源:', data.source);
+            } else {
+                console.error('定时任务执行失败，无法获取价格数据');
+            }
+        } catch (error) {
+            console.error('定时任务执行出错:', error);
+        }
+    }
+};

@@ -7,7 +7,7 @@ const api = new Hono<{ Bindings: Env }>()
 // 获取价格数据的主要接口
 api.get('/price/request', getPriceData)
 api.post('/price/post', savePriceData)
-api.delete('/clearCache',clearCache)
+api.delete('/clearCache', clearCache)
 
 // 健康检查接口
 api.get('/health', (c) => {
@@ -15,7 +15,7 @@ api.get('/health', (c) => {
     success: true,
     message: 'API 服务正常',
     timestamp: Date.now(),
-    version: '1.0.0'
+    version: '1.0.1'
   });
 })
 
