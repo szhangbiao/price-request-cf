@@ -80,6 +80,8 @@ export interface Env {
   // 从 .dev.vars 的密钥配置
   JUHE_GOLD_APPKEY: string;
   JUHE_EXCHANGE_RATE_APPKEY: string;
+  // 邮件服务（SendGrid）配置
+  SENDGRID_API_KEY?: string;
   
   // Redis 配置（从 .dev.vars 获取）
   UPSTASH_REDIS_REST_URL: string;

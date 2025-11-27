@@ -26,10 +26,11 @@ export async function sendEmail(c: Context<{ Bindings: Env }>) {
                 timestamp: Date.now()
             }, 400);
         }
-        // 使用用户在 index.tsx 中使用的发件人配置
+        // 使用环境变量中的发件人与 SendGrid API Key
         const emailService = new EmailService(
             'noreply@szhangbiao.cn',
-            '价格监控系统'
+            '价格监控系统',
+            c.env.SENDGRID_API_KEY
         );
         const emailSent = await emailService.sendPriceUpdateEmail(
             email,

@@ -6,13 +6,20 @@ import { PriceData, GoldData, ExchangeRateData } from '../types/price';
  * MailChannels 与 Cloudflare Workers 深度集成，免费额度：每天 10,000 封邮件
  */
 export class EmailService {
-  private readonly MAILCHANNELS_API = 'https://api.mailchannels.net/tx/v1/send';
+  private readonly SENDGRID_API = 'https://api.sendgrid.com/v3/mail/send';
   private fromEmail: string;
   private fromName: string;
+  private apiKey?: string;
 
-  constructor(fromEmail: string = 'noreply@yourdomain.com', fromName: string = '价格监控系统') {
+  constructor(
+    fromEmail: string = 'noreply@yourdomain.com',
+    fromName: string = '价格监控系统',
+    apiKey?: string
+  ) {
     this.fromEmail = fromEmail;
     this.fromName = fromName;
+    // 仅使用构造函数传入的 API Key；在 Workers 中请通过 env 注入
+    this.apiKey = apiKey;
   }
 
   /**
@@ -29,10 +36,16 @@ export class EmailService {
     toName?: string
   ): Promise<boolean> {
     try {
-      const response = await fetch(this.MAILCHANNELS_API, {
+      if (!this.apiKey) {
+        console.error('缺少 SendGrid API Key，请在构造 EmailService 时传入。');
+        return false;
+      }
+
+      const response = await fetch(this.SENDGRID_API, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           personalizations: [
@@ -100,10 +113,16 @@ export class EmailService {
         value: htmlContent,
       });
 
-      const response = await fetch(this.MAILCHANNELS_API, {
+      if (!this.apiKey) {
+        console.error('缺少 SendGrid API Key，请在构造 EmailService 时传入。');
+        return false;
+      }
+
+      const response = await fetch(this.SENDGRID_API, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           personalizations: [
