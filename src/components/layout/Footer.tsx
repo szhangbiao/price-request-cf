@@ -10,7 +10,7 @@ const Footer: FC = () => {
           <a href="https://www.juhe.cn/" class="footer-link">API</a>
           <a href="https://github.com/szhangbiao/price-request-cf" target="_blank" class="footer-link">GitHub</a>
         </div>
-        <p class="footer-text">© 2025 Price Demo - 实时价格数据服务</p>
+        <p class="footer-text">© 2025 Price Pole - 实时价格数据服务</p>
       </div>
     </footer>
   )

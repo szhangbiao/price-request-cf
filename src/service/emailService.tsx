@@ -12,7 +12,7 @@ export class EmailService {
   private apiKey?: string;
 
   constructor(
-    fromEmail: string = 'noreply@yourdomain.com',
+    fromEmail: string = 'noreply@szhangbiao.cn',
     fromName: string = '价格监控系统',
     apiKey?: string
   ) {

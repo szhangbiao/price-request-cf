@@ -7,6 +7,7 @@ import mainRouter from './routes/index';
 import apiRouter from './routes/api';
 import { PriceHandler } from './handler/priceHandler';
 import { EmailService } from './service/emailService';
+import { errorResponse } from './utils/response';
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -18,6 +19,30 @@ app.use('*', cors());
 app.route('/', staticRouter);  // 静态资源路由（优先级最高）
 app.route('/', mainRouter);    // 主页面路由
 app.route('/api', apiRouter);  // API 路由
+
+/**
+ * 404 处理
+ */
+app.notFound((c) => {
+    return c.json(
+        {
+            ...errorResponse('Not Found'),
+            path: c.req.path,
+        },
+        404
+    );
+});
+
+/**
+ * 全局错误处理
+ */
+app.onError((err, c) => {
+    console.error('Error:', err);
+    return c.json(
+        errorResponse(err.message || 'Internal Server Error'),
+        500
+    );
+});
 
 // 导出 Worker 的处理器
 export default {

@@ -9,8 +9,8 @@ interface NavbarProps {
   }>;
 }
 
-const Navbar: FC<NavbarProps> = ({ 
-  title = "Price Demo",
+const Navbar: FC<NavbarProps> = ({
+  title = "Price Pole",
   links = [
     { href: "/", label: "首页", active: true },
     { href: "/about", label: "关于" }
@@ -25,13 +25,13 @@ const Navbar: FC<NavbarProps> = ({
             <span class="brand-text">{title}</span>
           </a>
         </div>
-        
+
         <nav class="navbar-nav">
           <ul class="nav-list">
             {links.map((link, index) => (
               <li class="nav-item" key={index}>
-                <a 
-                  href={link.href} 
+                <a
+                  href={link.href}
                   class={`nav-link ${link.active ? 'active' : ''}`}
                 >
                   {link.label}
@@ -40,7 +40,7 @@ const Navbar: FC<NavbarProps> = ({
             ))}
           </ul>
         </nav>
-        
+
         <div class="navbar-actions">
           <button class="theme-toggle" id="theme-toggle-btn" title="切换主题">
             <i class="theme-icon light-icon fas fa-sun"></i>
