@@ -68,18 +68,11 @@ export default {
                 const now = new Date(event.scheduledTime);
                 const utcHour = now.getUTCHours();
                 const utcMinute = now.getUTCMinutes();
-
                 // 如果是 UTC 6:50（北京时间 14:50），发送邮件
                 if (utcHour === 6 && utcMinute === 50) {
                     console.log('触发每日邮件发送任务...');
-                    const emailService = new EmailService(
-                        'noreply@szhangbiao.cn',
-                        '价格监控系统'
-                    );
-                    const emailSent = await emailService.sendPriceUpdateEmail(
-                        'szhangbiao@gmail.com',
-                        data
-                    );
+                    const emailService = new EmailService('noreply@szhangbiao.cn');
+                    const emailSent = await emailService.sendPriceHtmlEmail('szhangbiao@gmail.com', data);
                     if (emailSent) {
                         console.log('每日价格更新邮件发送成功');
                     } else {
