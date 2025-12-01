@@ -2,24 +2,14 @@ import { PriceData, GoldData, ExchangeRateData } from '../types/price';
 
 /**
  * 邮件发送服务
- * 使用 MailChannels API 发送邮件
- * MailChannels 与 Cloudflare Workers 深度集成，免费额度：每天 10,000 封邮件
+ * 使用自定义邮件发送 API
  */
 export class EmailService {
-  private readonly SENDGRID_API = 'https://api.sendgrid.com/v3/mail/send';
+  private readonly MAIL_API = 'https://mailsend.szhangbiao.cn/api/mail/send';
   private fromEmail: string;
-  private fromName: string;
-  private apiKey?: string;
 
-  constructor(
-    fromEmail: string = 'noreply@szhangbiao.cn',
-    fromName: string = '价格监控系统',
-    apiKey?: string
-  ) {
+  constructor(fromEmail: string = 'noreply@szhangbiao.cn') {
     this.fromEmail = fromEmail;
-    this.fromName = fromName;
-    // 仅使用构造函数传入的 API Key；在 Workers 中请通过 env 注入
-    this.apiKey = apiKey;
   }
 
   /**
@@ -27,43 +17,20 @@ export class EmailService {
    * @param to 收件人邮箱
    * @param subject 邮件主题
    * @param content 邮件内容（纯文本）
-   * @param toName 收件人姓名（可选）
    */
-  async sendTextEmail(
-    to: string,
-    subject: string,
-    content: string,
-    toName?: string
-  ): Promise<boolean> {
+  async sendTextEmail(to: string, subject: string, content: string): Promise<boolean> {
     try {
-      if (!this.apiKey) {
-        console.error('缺少 SendGrid API Key，请在构造 EmailService 时传入。');
-        return false;
-      }
-
-      const response = await fetch(this.SENDGRID_API, {
+      const response = await fetch(this.MAIL_API, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          personalizations: [
-            {
-              to: [{ email: to, name: toName || to }],
-            },
-          ],
-          from: {
-            email: this.fromEmail,
-            name: this.fromName,
-          },
+          from: this.fromEmail,
+          to: to,
           subject: subject,
-          content: [
-            {
-              type: 'text/plain',
-              value: content,
-            },
-          ],
+          content: content,
+          isHtml: false,
         }),
       });
 
@@ -86,56 +53,21 @@ export class EmailService {
    * @param to 收件人邮箱
    * @param subject 邮件主题
    * @param htmlContent HTML 内容
-   * @param textContent 纯文本内容（备用）
    * @param toName 收件人姓名（可选）
    */
-  async sendHtmlEmail(
-    to: string,
-    subject: string,
-    htmlContent: string,
-    textContent?: string,
-    toName?: string
-  ): Promise<boolean> {
+  async sendHtmlEmail(to: string, subject: string, htmlContent: string): Promise<boolean> {
     try {
-      const content = [];
-
-      // 添加纯文本版本（作为备用）
-      if (textContent) {
-        content.push({
-          type: 'text/plain',
-          value: textContent,
-        });
-      }
-
-      // 添加 HTML 版本
-      content.push({
-        type: 'text/html',
-        value: htmlContent,
-      });
-
-      if (!this.apiKey) {
-        console.error('缺少 SendGrid API Key，请在构造 EmailService 时传入。');
-        return false;
-      }
-
-      const response = await fetch(this.SENDGRID_API, {
+      const response = await fetch(this.MAIL_API, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          personalizations: [
-            {
-              to: [{ email: to, name: toName || to }],
-            },
-          ],
-          from: {
-            email: this.fromEmail,
-            name: this.fromName,
-          },
+          from: this.fromEmail,
+          to: to,
           subject: subject,
-          content: content,
+          content: htmlContent,
+          isHtml: true,
         }),
       });
 
@@ -153,26 +85,25 @@ export class EmailService {
     }
   }
 
+  async sendPriceTextEmail(to: string, priceData: PriceData): Promise<boolean> {
+    const subject = `价格数据更新通知 - ${new Date(priceData.updateTime).toLocaleString('zh-CN')}`;
+    const content = this.generatePriceUpdateText(priceData);
+    return await this.sendTextEmail(to, subject, content);
+  }
+
   /**
    * 发送价格数据更新通知邮件
    * @param to 收件人邮箱
    * @param priceData 价格数据
-   * @param toName 收件人姓名（可选）
    */
-  async sendPriceUpdateEmail(
-    to: string,
-    priceData: PriceData,
-    toName?: string
-  ): Promise<boolean> {
+  async sendPriceHtmlEmail(to: string, priceData: PriceData): Promise<boolean> {
+
     const subject = `价格数据更新通知 - ${new Date(priceData.updateTime).toLocaleString('zh-CN')}`;
 
     // 生成 HTML 内容
     const htmlContent = this.generatePriceUpdateHtml(priceData);
 
-    // 生成纯文本内容（备用）
-    const textContent = this.generatePriceUpdateText(priceData);
-
-    return await this.sendHtmlEmail(to, subject, htmlContent, textContent, toName);
+    return await this.sendHtmlEmail(to, subject, htmlContent);
   }
 
   /**
@@ -180,20 +111,12 @@ export class EmailService {
    * @param recipients 收件人列表
    * @param priceData 价格数据
    */
-  async sendPriceUpdateToMultiple(
-    recipients: Array<{ email: string; name?: string }>,
-    priceData: PriceData
-  ): Promise<{ success: number; failed: number }> {
+  async sendPriceUpdateToMultiple(recipients: Array<{ email: string; name?: string }>, priceData: PriceData): Promise<{ success: number; failed: number }> {
     let success = 0;
     let failed = 0;
 
     for (const recipient of recipients) {
-      const result = await this.sendPriceUpdateEmail(
-        recipient.email,
-        priceData,
-        recipient.name
-      );
-
+      const result = await this.sendPriceHtmlEmail(recipient.email, priceData,);
       if (result) {
         success++;
       } else {
@@ -222,43 +145,33 @@ export class EmailService {
     let goldSection = '';
     if (priceData.gold) {
       const gold = priceData.gold;
+      // 解析涨跌数据，判断是涨还是跌
+      const limitValue = parseFloat(gold.limit);
+      const limitColor = limitValue >= 0 ? '#dc3545' : '#28a745'; // 涨红跌绿
+
       goldSection = `
-        <div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
-          <h3 style="margin-top: 0; color: #856404;">📊 黄金价格</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>品种：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${gold.variety}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>最新价：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd; color: #d9534f; font-weight: bold;">${gold.latestpri}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>开盘价：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${gold.openpri}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>最高价：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${gold.maxpri}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>最低价：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${gold.minpri}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>昨收价：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${gold.yespri}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>涨跌：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${gold.limit}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px;"><strong>成交量：</strong></td>
-              <td style="padding: 8px;">${gold.totalvol}</td>
-            </tr>
-          </table>
+        <div style="margin: 20px 0; border: 1px solid #ffeeba; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+          <div style="background-color: #fff3cd; padding: 12px 20px; border-bottom: 1px solid #ffeeba;">
+            <h3 style="margin: 0; color: #856404; font-size: 16px; display: flex; align-items: center;">
+              <span style="margin-right: 8px;">📊</span> 黄金价格
+            </h3>
+          </div>
+          <div style="padding: 20px; background-color: #ffffff;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #666; width: 40%;"><strong>品种</strong></td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">${gold.variety}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #666;"><strong>最新价</strong></td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold; font-size: 16px; text-align: right;">${gold.latestpri}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; color: #666;"><strong>涨跌</strong></td>
+                <td style="padding: 10px 0; color: ${limitColor}; font-weight: bold; text-align: right;">${gold.limit}</td>
+              </tr>
+            </table>
+          </div>
         </div>
       `;
     }
@@ -267,59 +180,99 @@ export class EmailService {
     if (priceData.exchangeRate) {
       const rate = priceData.exchangeRate;
       exchangeRateSection = `
-        <div style="margin: 20px 0; padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; border-radius: 4px;">
-          <h3 style="margin-top: 0; color: #0c5460;">💱 汇率信息</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>货币对：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${rate.currencyF_Name} → ${rate.currencyT_Name}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>汇率：</strong></td>
-              <td style="padding: 8px; border-bottom: 1px solid #ddd; color: #17a2b8; font-weight: bold;">${rate.exchange}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px;"><strong>更新时间：</strong></td>
-              <td style="padding: 8px;">${rate.updateTime}</td>
-            </tr>
-          </table>
+        <div style="margin: 20px 0; border: 1px solid #bee5eb; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+          <div style="background-color: #d1ecf1; padding: 12px 20px; border-bottom: 1px solid #bee5eb;">
+            <h3 style="margin: 0; color: #0c5460; font-size: 16px; display: flex; align-items: center;">
+              <span style="margin-right: 8px;">💱</span> 汇率信息
+            </h3>
+          </div>
+          <div style="padding: 20px; background-color: #ffffff;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #666; width: 40%;"><strong>货币对</strong></td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">${rate.currencyF_Name} → ${rate.currencyT_Name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; color: #666;"><strong>汇率</strong></td>
+                <td style="padding: 10px 0; color: #17a2b8; font-weight: bold; font-size: 16px; text-align: right;">${rate.exchange}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    let stocksSection = '';
+    if (priceData.stocks && priceData.stocks.length > 0) {
+      const stockRows = priceData.stocks.map(stock => {
+        const changeColor = stock.change >= 0 ? '#dc3545' : '#28a745'; // 涨红跌绿
+        const changeSign = stock.change >= 0 ? '+' : '';
+        return `
+          <tr>
+            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px;"><strong>${stock.name}</strong></td>
+            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold; text-align: right; font-size: 14px;">${stock.current.toFixed(2)}</td>
+            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; color: ${changeColor}; text-align: right; font-size: 14px;">${changeSign}${stock.change.toFixed(2)}</td>
+            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; color: ${changeColor}; font-weight: bold; text-align: right; font-size: 14px;">${changeSign}${stock.percent.toFixed(2)}%</td>
+          </tr>
+        `;
+      }).join('');
+
+      stocksSection = `
+        <div style="margin: 20px 0; border: 1px solid #cce5ff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+          <div style="background-color: #e7f3ff; padding: 12px 20px; border-bottom: 1px solid #cce5ff;">
+            <h3 style="margin: 0; color: #004085; font-size: 16px; display: flex; align-items: center;">
+              <span style="margin-right: 8px;">📊</span> 三大指数
+            </h3>
+          </div>
+          <div style="padding: 0; background-color: #ffffff;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr style="background-color: #f8f9fa;">
+                <th style="padding: 12px 15px; border-bottom: 1px solid #eee; text-align: left; color: #666; font-weight: 600; font-size: 13px;">指数名称</th>
+                <th style="padding: 12px 15px; border-bottom: 1px solid #eee; text-align: right; color: #666; font-weight: 600; font-size: 13px;">当前价格</th>
+                <th style="padding: 12px 15px; border-bottom: 1px solid #eee; text-align: right; color: #666; font-weight: 600; font-size: 13px;">涨跌额</th>
+                <th style="padding: 12px 15px; border-bottom: 1px solid #eee; text-align: right; color: #666; font-weight: 600; font-size: 13px;">涨跌幅</th>
+              </tr>
+              ${stockRows}
+            </table>
+          </div>
         </div>
       `;
     }
 
     return `
-      <!DOCTYPE html>
-      <html lang="zh-CN">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>价格数据更新通知</title>
-      </head>
-      <body style="font-family: 'Microsoft YaHei', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
-        <div style="background-color: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 0;">
-            📈 价格数据更新通知
-          </h2>
-          
-          <p style="color: #7f8c8d; margin: 15px 0;">
-            <strong>更新时间：</strong>${updateTime}
-          </p>
-          
-          <p style="color: #7f8c8d; margin: 15px 0;">
-            <strong>数据来源：</strong>${priceData.source || '未知'}
-          </p>
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>价格数据更新通知</title>
+          </head>
+          <body style="font-family: 'Microsoft YaHei', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+                  <div style="background-color: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 0;">
+                      📈 价格数据更新通知
+                    </h2>
 
-          ${goldSection}
-          ${exchangeRateSection}
+                    <p style="color: #7f8c8d; margin: 15px 0;">
+                      <strong>更新时间：</strong>${updateTime}
+                    </p>
 
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #95a5a6; font-size: 12px;">
-            <p>这是一封自动发送的邮件，请勿回复。</p>
-            <p>© ${new Date().getFullYear()} 价格监控系统 | Powered by Cloudflare Workers</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+                    <p style="color: #7f8c8d; margin: 15px 0;">
+                      <strong>数据来源：</strong>${priceData.source || '未知'}
+                    </p>
+
+                    ${stocksSection}
+                    ${goldSection}
+                    ${exchangeRateSection}
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #95a5a6; font-size: 12px;">
+                      <p>这是一封自动发送的邮件，请勿回复。</p>
+                      <p>© ${new Date().getFullYear()} 价格监控系统 | Powered by Price Pole</p>
+                    </div>
+                  </div>
+              </body>
+            </html>
+            `;
   }
 
   /**
@@ -334,30 +287,33 @@ export class EmailService {
     content += `更新时间：${updateTime}\n`;
     content += `数据来源：${priceData.source || '未知'}\n\n`;
 
+    if (priceData.stocks && priceData.stocks.length > 0) {
+      content += `【三大指数】\n`;
+      priceData.stocks.forEach(stock => {
+        const changeSign = stock.change >= 0 ? '+' : '';
+        content += `${stock.name}：${stock.current.toFixed(2)} (${changeSign}${stock.change.toFixed(2)}, ${changeSign}${stock.percent.toFixed(2)}%)\n`;
+      });
+      content += `\n`;
+    }
+
     if (priceData.gold) {
       const gold = priceData.gold;
       content += `【黄金价格】\n`;
       content += `品种：${gold.variety}\n`;
       content += `最新价：${gold.latestpri}\n`;
-      content += `开盘价：${gold.openpri}\n`;
-      content += `最高价：${gold.maxpri}\n`;
-      content += `最低价：${gold.minpri}\n`;
-      content += `昨收价：${gold.yespri}\n`;
-      content += `涨跌：${gold.limit}\n`;
-      content += `成交量：${gold.totalvol}\n\n`;
+      content += `涨跌：${gold.limit}\n\n`;
     }
 
     if (priceData.exchangeRate) {
       const rate = priceData.exchangeRate;
       content += `【汇率信息】\n`;
       content += `货币对：${rate.currencyF_Name} → ${rate.currencyT_Name}\n`;
-      content += `汇率：${rate.exchange}\n`;
-      content += `更新时间：${rate.updateTime}\n\n`;
+      content += `汇率：${rate.exchange}\n\n`;
     }
 
     content += `---\n`;
     content += `这是一封自动发送的邮件，请勿回复。\n`;
-    content += `© ${new Date().getFullYear()} 价格监控系统 | Powered by Cloudflare Workers`;
+    content += `© ${new Date().getFullYear()} 价格监控系统 | Powered by Price Pole`;
 
     return content;
   }

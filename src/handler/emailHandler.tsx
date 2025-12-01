@@ -17,8 +17,10 @@ export async function sendEmail(c: Context<{ Bindings: Env }>) {
                 timestamp: Date.now()
             }, 400);
         }
+        const isHtml = c.req.query('isHtml') === 'true';
+        const forceRefresh = c.req.query('forceRefresh') === 'true';
         const priceHandler = new PriceHandler(c.env);
-        const data = await priceHandler.getPriceData('request_data', false);
+        const data = await priceHandler.getPriceData('request_data', forceRefresh);
         if (!data) {
             return c.json({
                 success: false,
@@ -26,16 +28,8 @@ export async function sendEmail(c: Context<{ Bindings: Env }>) {
                 timestamp: Date.now()
             }, 400);
         }
-        // 使用环境变量中的发件人与 SendGrid API Key
-        const emailService = new EmailService(
-            'noreply@szhangbiao.cn',
-            '价格监控系统',
-            c.env.SENDGRID_API_KEY
-        );
-        const emailSent = await emailService.sendPriceUpdateEmail(
-            email,
-            data
-        );
+        const emailService = new EmailService('noreply@szhangbiao.cn');
+        const emailSent = isHtml ? await emailService.sendPriceHtmlEmail(email, data) : await emailService.sendPriceTextEmail(email, data);
         if (emailSent) {
             return c.json({
                 success: true,
