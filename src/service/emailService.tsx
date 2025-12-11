@@ -8,7 +8,7 @@ export class EmailService {
   private readonly MAIL_API = 'https://mailsend.szhangbiao.cn/api/mail/send';
   private fromEmail: string;
 
-  constructor(fromEmail: string = 'noreply@szhangbiao.cn') {
+  constructor(fromEmail: string = 'no-replay@healthx.cloud') {
     this.fromEmail = fromEmail;
   }
 

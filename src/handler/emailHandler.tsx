@@ -28,7 +28,7 @@ export async function sendEmail(c: Context<{ Bindings: Env }>) {
                 timestamp: Date.now()
             }, 400);
         }
-        const emailService = new EmailService('noreply@szhangbiao.cn');
+        const emailService = new EmailService('no-replay@healthx.cloud');
         const emailSent = isHtml ? await emailService.sendPriceHtmlEmail(email, data) : await emailService.sendPriceTextEmail(email, data);
         if (emailSent) {
             return c.json({
