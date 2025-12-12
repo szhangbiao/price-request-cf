@@ -62,7 +62,7 @@ export async function handleScheduledTask(event: ScheduledEvent, env: Cloudflare
     // 检查是否需要发送邮件
     if (shouldSendEmail(event.scheduledTime)) {
         console.log('触发每日邮件发送任务...');
-        const emailService = new EmailService('noreply@szhangbiao.cn');
+        const emailService = new EmailService('noreply@healthx.cloud');
         const emailSent = await emailService.sendPriceHtmlEmail('szhangbiao@gmail.com', data);
 
         if (emailSent) {
