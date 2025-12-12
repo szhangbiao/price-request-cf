@@ -6,11 +6,6 @@ import { PriceData, GoldData, ExchangeRateData } from '../types/price';
  */
 export class EmailService {
   private readonly MAIL_API = 'https://mailsend.szhangbiao.cn/api/mail/send';
-  private fromEmail: string;
-
-  constructor(fromEmail: string = 'no-replay@healthx.cloud') {
-    this.fromEmail = fromEmail;
-  }
 
   /**
    * 发送纯文本邮件
@@ -18,18 +13,19 @@ export class EmailService {
    * @param subject 邮件主题
    * @param content 邮件内容（纯文本）
    */
-  async sendTextEmail(to: string, subject: string, content: string): Promise<boolean> {
+  async sendTextEmail(to: string, subject: string, content: string, useTool: string = 'mailersend'): Promise<boolean> {
     try {
       const response = await fetch(this.MAIL_API, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-USE-TOOL': useTool,
         },
         body: JSON.stringify({
-          from: this.fromEmail,
           to: to,
           subject: subject,
           content: content,
+          from: useTool === 'mailersend' ? 'Healthx Cloud' : 'Price Pole',
           isHtml: false,
         }),
       });
@@ -55,7 +51,7 @@ export class EmailService {
    * @param htmlContent HTML 内容
    * @param toName 收件人姓名（可选）
    */
-  async sendHtmlEmail(to: string, subject: string, htmlContent: string): Promise<boolean> {
+  async sendHtmlEmail(to: string, subject: string, htmlContent: string, useTool: string = 'mailersend'): Promise<boolean> {
     try {
       const response = await fetch(this.MAIL_API, {
         method: 'POST',
@@ -63,10 +59,10 @@ export class EmailService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: this.fromEmail,
           to: to,
           subject: subject,
           content: htmlContent,
+          from: useTool === 'mailersend' ? 'Healthx Cloud' : 'Price Pole',
           isHtml: true,
         }),
       });
@@ -85,10 +81,10 @@ export class EmailService {
     }
   }
 
-  async sendPriceTextEmail(to: string, priceData: PriceData): Promise<boolean> {
+  async sendPriceTextEmail(to: string, priceData: PriceData, useTool: string = 'mailersend'): Promise<boolean> {
     const subject = `价格数据更新通知 - ${new Date(priceData.updateTime).toLocaleString('zh-CN')}`;
     const content = this.generatePriceUpdateText(priceData);
-    return await this.sendTextEmail(to, subject, content);
+    return await this.sendTextEmail(to, subject, content, useTool);
   }
 
   /**
@@ -97,7 +93,7 @@ export class EmailService {
    * @param priceData 价格数据
    * @param templateType 模板类型，默认为 'default'
    */
-  async sendPriceHtmlEmail(to: string, priceData: PriceData, templateType: 'default' | 'minimal' = 'default'): Promise<boolean> {
+  async sendPriceHtmlEmail(to: string, priceData: PriceData, useTool: string = 'mailersend', templateType: 'default' | 'minimal' = 'default'): Promise<boolean> {
     const subject = `价格数据更新通知 - ${new Date(priceData.updateTime).toLocaleString('zh-CN')}`;
 
     // 使用模板系统生成 HTML 内容
@@ -110,7 +106,7 @@ export class EmailService {
       updateTime: priceData.updateTime,
     });
 
-    return await this.sendHtmlEmail(to, subject, htmlContent);
+    return await this.sendHtmlEmail(to, subject, htmlContent, useTool);
   }
 
   /**
@@ -119,12 +115,12 @@ export class EmailService {
    * @param priceData 价格数据
    * @param templateType 模板类型，默认为 'default'
    */
-  async sendPriceUpdateToMultiple(recipients: Array<{ email: string; name?: string }>, priceData: PriceData, templateType: 'default' | 'minimal' = 'default'): Promise<{ success: number; failed: number }> {
+  async sendPriceUpdateToMultiple(recipients: Array<{ email: string; name?: string }>, priceData: PriceData, useTool: 'mailersend' | 'n8n-gmail' = 'mailersend', templateType: 'default' | 'minimal' = 'default'): Promise<{ success: number; failed: number }> {
     let success = 0;
     let failed = 0;
 
     for (const recipient of recipients) {
-      const result = await this.sendPriceHtmlEmail(recipient.email, priceData, templateType);
+      const result = await this.sendPriceHtmlEmail(recipient.email, priceData, useTool, templateType);
       if (result) {
         success++;
       } else {

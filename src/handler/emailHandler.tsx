@@ -17,6 +17,7 @@ export async function sendEmail(c: Context<{ Bindings: Env }>) {
                 timestamp: Date.now()
             }, 400);
         }
+        const xUseTool = c.req.header('X-USE-TOOL');
         const isHtml = c.req.query('isHtml') === 'true';
         const forceRefresh = c.req.query('forceRefresh') === 'true';
         const priceHandler = new PriceHandler(c.env);
@@ -28,8 +29,8 @@ export async function sendEmail(c: Context<{ Bindings: Env }>) {
                 timestamp: Date.now()
             }, 400);
         }
-        const emailService = new EmailService('noreplay@healthx.cloud');
-        const emailSent = isHtml ? await emailService.sendPriceHtmlEmail(email, data) : await emailService.sendPriceTextEmail(email, data);
+        const emailService = new EmailService();
+        const emailSent = isHtml ? await emailService.sendPriceHtmlEmail(email, data, xUseTool) : await emailService.sendPriceTextEmail(email, data, xUseTool);
         if (emailSent) {
             return c.json({
                 success: true,
