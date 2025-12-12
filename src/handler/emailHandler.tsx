@@ -30,7 +30,7 @@ export async function sendEmail(c: Context<{ Bindings: Env }>) {
             }, 400);
         }
         const emailService = new EmailService();
-        const emailSent = isHtml ? await emailService.sendPriceHtmlEmail(email, data, xUseTool) : await emailService.sendPriceTextEmail(email, data, xUseTool);
+        const emailSent = isHtml ? await emailService.sendPriceHtmlEmail(email, data, xUseTool, 'minimal') : await emailService.sendPriceTextEmail(email, data, xUseTool);
         if (emailSent) {
             return c.json({
                 success: true,

@@ -57,6 +57,7 @@ export class EmailService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-USE-TOOL': useTool,
         },
         body: JSON.stringify({
           to: to,
