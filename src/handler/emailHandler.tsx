@@ -1,6 +1,5 @@
 import { Context } from 'hono';
 import { EmailService } from '../service/emailService';
-import { Env } from '../types/price';
 import { PriceHandler } from './priceHandler';
 
 /**

@@ -8,7 +8,7 @@ import apiRouter from './routes/api';
 import { errorResponse } from './utils/response';
 import { handleScheduledTask } from './scheduler/scheduledTaskHandler';
 
-const app = new Hono<{ Bindings: CloudflareBindings }>();
+const app = new Hono<{ Bindings: Env }>();
 
 // 全局中间件
 app.use('*', logger());
@@ -49,7 +49,7 @@ export default {
     fetch: app.fetch,
 
     // 定时任务处理器
-    async scheduled(event: ScheduledEvent, env: CloudflareBindings, ctx: ExecutionContext) {
+    async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
         try {
             await handleScheduledTask(event, env);
         } catch (error) {

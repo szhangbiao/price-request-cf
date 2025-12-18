@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
+import { sendWxTemplateMsgToUser } from '../handler/wechatHandler'
 import { getPriceData, savePriceData, clearCache } from '../handler/priceHandler'
 import { sendEmail } from '../handler/emailHandler'
-import { Env } from '../types/price'
 
 const api = new Hono<{ Bindings: Env }>()
 
@@ -12,6 +12,9 @@ api.delete('/clearCache', clearCache)
 
 // 邮件测试接口
 api.get('/email', sendEmail)
+
+// 微信价格推送接口
+api.get('/wxPrice', sendWxTemplateMsgToUser)
 
 // 健康检查接口
 api.get('/health', (c) => {

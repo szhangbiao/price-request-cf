@@ -1,5 +1,6 @@
 import { PriceHandler } from '../handler/priceHandler';
 import { EmailService } from '../service/emailService';
+import { WechatSendService } from '../service/wechatSend';
 
 /**
  * 检查是否应该跳过当前触发时间
@@ -35,9 +36,23 @@ function shouldSendEmail(scheduledTime: number): boolean {
 }
 
 /**
+ * 检查是否需要发送微信消息
+ * @param scheduledTime 触发时间戳
+ * @returns true 表示需要发送微信消息
+ */
+function shouldSendWxMessage(scheduledTime: number): boolean {
+    const now = new Date(scheduledTime);
+    const utcHour = now.getUTCHours();
+    const utcMinute = now.getUTCMinutes();
+
+    // 北京时间 15:30（UTC 7:30）和 14:50（UTC 6:50）发送微信消息
+    return (utcHour === 7 && utcMinute === 30) || (utcHour === 6 && utcMinute === 50);
+}
+
+/**
  * 处理定时任务
  */
-export async function handleScheduledTask(event: ScheduledEvent, env: CloudflareBindings): Promise<void> {
+export async function handleScheduledTask(event: ScheduledEvent, env: Env): Promise<void> {
     console.log('定时任务触发，开始刷新价格数据...');
     console.log('触发时间:', new Date(event.scheduledTime).toISOString());
 
@@ -69,6 +84,17 @@ export async function handleScheduledTask(event: ScheduledEvent, env: Cloudflare
             console.log('每日价格更新邮件发送成功');
         } else {
             console.error('每日价格更新邮件发送失败');
+        }
+    }
+    // 检查是否需要发送微信消息
+    if (shouldSendWxMessage(event.scheduledTime)) {
+        console.log('触发每日微信消息发送任务...');
+        const wechatSendService = new WechatSendService();
+        const wxSent = await wechatSendService.sendWxPrice(env.WX_TO_USERID, env.WX_TEMPLATE_ID, data);
+        if (wxSent) {
+            console.log('每日价格更新微信消息发送成功');
+        } else {
+            console.error('每日价格更新微信消息发送失败');
         }
     }
 }

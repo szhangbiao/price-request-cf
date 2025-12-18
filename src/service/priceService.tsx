@@ -35,13 +35,13 @@ export class PriceService {
       }
 
       const data = await response.json() as ApiResponse<MetalVarietiesMap[]>;
-      
+
       // 根据聚合数据API的响应格式处理数据
       if (data.error_code === 0 && data.result && data.result.length > 0) {
         const goldInfo = data.result[0];
         return goldInfo['Au99.99'];
       }
-      
+
       return null;
     } catch (error) {
       console.error('获取黄金价格失败:', error);
@@ -69,13 +69,13 @@ export class PriceService {
       }
 
       const data = await response.json() as ApiResponse<ExchangeRateData[]>;
-      
+
       // 根据聚合数据API的响应格式处理数据
       if (data.error_code === 0 && data.result) {
         const rateInfo = data.result;
         return rateInfo[0];
       }
-      
+
       return null;
     } catch (error) {
       console.error('获取汇率失败:', error);
@@ -84,7 +84,7 @@ export class PriceService {
   }
 
   private async getStockDatas(): Promise<StockData[] | null> {
-    const stockCode = ["s_sh000001","s_sz399001","s_sz399006"];
+    const stockCode = ["s_sh000001", "s_sz399001", "s_sz399006"];
     const baseUrl = "https://hq.sinajs.cn/list=";
     const stockDataList: StockData[] = [];
 
@@ -93,11 +93,11 @@ export class PriceService {
       for (const code of stockCode) {
         const url = `${baseUrl}${code}`;
         console.log(`正在获取股票数据: ${code}`);
-        
+
         const response = await fetch(url, {
           method: 'GET',
           headers: {
-            'Referer':'https://finance.sina.com.cn',
+            'Referer': 'https://finance.sina.com.cn',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept-Charset': 'GBK,utf-8;q=0.7,*;q=0.3'
           }
@@ -110,7 +110,7 @@ export class PriceService {
 
         // 获取原始字节数据
         const arrayBuffer = await response.arrayBuffer();
-        
+
         // 尝试使用GBK解码，如果不支持则使用UTF-8
         let textData: string;
         try {
@@ -148,7 +148,7 @@ export class PriceService {
 
       console.log(`成功获取 ${stockDataList.length} 个股票数据`);
       return stockDataList.length > 0 ? stockDataList : null;
-      
+
     } catch (error) {
       console.error('获取股票数据失败:', error);
       return null;
@@ -162,7 +162,7 @@ export class PriceService {
   async getAllPriceData(): Promise<PriceData | null> {
     try {
       console.log('开始获取所有价格数据...');
-      
+
       // 并行获取所有数据
       const [goldData, exchangeRateData, stockDataList] = await Promise.all([
         this.getGoldPrice(),
@@ -196,7 +196,7 @@ export class PriceService {
 
       console.log('成功获取完整价格数据');
       return priceData;
-      
+
     } catch (error) {
       console.error('获取完整价格数据失败:', error);
       return null;

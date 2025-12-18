@@ -70,23 +70,3 @@ export interface PriceStorage {
   data: any;
   source: string;
 }
-
-// Cloudflare Workers 环境变量接口
-export interface Env {
-  // 从 wrangler.jsonc 的 vars 配置
-  GOLD_API_URL: string;
-  EXCHANGE_RATE_API_URL: string;
-  
-  // 从 .dev.vars 的密钥配置
-  JUHE_GOLD_APPKEY: string;
-  JUHE_EXCHANGE_RATE_APPKEY: string;
-  // 邮件服务（SendGrid）配置
-  SENDGRID_API_KEY?: string;
-  
-  // Redis 配置（从 .dev.vars 获取）
-  UPSTASH_REDIS_REST_URL: string;
-  UPSTASH_REDIS_REST_TOKEN: string;
-  
-  // KV 存储绑定
-  PRICE_DATA: KVNamespace;
-}
