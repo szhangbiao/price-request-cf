@@ -2,7 +2,7 @@ import { PriceData } from '../types/price';
 
 export class WechatSendService {
 
-    private readonly WX_SEND_API = 'http://localhost:8787/api/wechat/wxprice';
+    private readonly WX_SEND_API = 'https://wxsend.szhangbiao.cn/api/wechat/wxprice';
 
     async sendWxPrice(toUserId: string, templateId: string, data: PriceData) {
         // 1. 格式化股票数据
