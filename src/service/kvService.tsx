@@ -1,5 +1,4 @@
-import { KVNamespace } from '@cloudflare/workers-types';
-import { PriceStorage, Env } from '../types/price';
+import { PriceStorage } from '../types/price';
 
 export class KVService {
   private kv: KVNamespace;
@@ -23,7 +22,7 @@ export class KVService {
         data,
         source
       };
-      
+
       // 将数据存储到KV，设置过期时间
       await this.kv.put(key, JSON.stringify(priceData), {
         expirationTtl: this.cacheTTL
@@ -48,7 +47,7 @@ export class KVService {
         data,
         source
       };
-      
+
       await this.kv.put(key, JSON.stringify(priceData), {
         expirationTtl: customTTL
       });
@@ -67,7 +66,7 @@ export class KVService {
     try {
       const data = await this.kv.get(key, 'text');
       if (!data) return null;
-      
+
       return JSON.parse(data) as PriceStorage;
     } catch (error) {
       console.error('从KV获取数据失败:', error);
@@ -141,7 +140,7 @@ export class KVService {
   async clearPattern(prefix: string): Promise<void> {
     try {
       const keys = await this.getKeys(prefix);
-      
+
       // KV 不支持批量删除，需要逐个删除
       const deletePromises = keys.map(key => this.kv.delete(key));
       await Promise.all(deletePromises);

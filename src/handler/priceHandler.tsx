@@ -2,7 +2,7 @@ import { Context } from 'hono';
 import { PriceService } from '../service/priceService';
 import { KVService } from '../service/kvService';
 import { UpstashService } from '../service/upstashService';
-import { PriceData, PriceStorage, Env } from '../types/price';
+import { PriceData, PriceStorage } from '../types/price';
 
 const KEY_REQUEST_DATA = 'request_data';
 

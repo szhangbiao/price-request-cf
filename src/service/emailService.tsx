@@ -1,4 +1,4 @@
-import { PriceData, GoldData, ExchangeRateData } from '../types/price';
+import { PriceData } from '../types/price';
 
 /**
  * 邮件发送服务

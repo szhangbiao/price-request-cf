@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis/cloudflare';
-import { PriceStorage, Env } from '../types/price';
+import { PriceStorage } from '../types/price';
 
 export class UpstashService {
   private redis: Redis;
@@ -26,7 +26,7 @@ export class UpstashService {
         data,
         source
       };
-      
+
       // 将数据存储到Redis，设置过期时间
       await this.redis.setex(key, this.cacheTTL, JSON.stringify(priceData));
     } catch (error) {
@@ -49,7 +49,7 @@ export class UpstashService {
         data,
         source
       };
-      
+
       // 将数据存储到Redis，设置自定义过期时间
       await this.redis.setex(key, customTTL, JSON.stringify(priceData));
     } catch (error) {
@@ -67,11 +67,11 @@ export class UpstashService {
     try {
       const data = await this.redis.get(key);
       if (!data) return null;
-      
+
       if (typeof data === 'string') {
         return JSON.parse(data) as PriceStorage;
       }
-      
+
       // 如果Redis返回的是对象，直接返回
       return data as PriceStorage;
     } catch (error) {

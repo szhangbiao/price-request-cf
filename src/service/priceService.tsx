@@ -5,7 +5,6 @@ import {
   ExchangeRateData,
   StockData,
   PriceData,
-  Env
 } from '../types/price';
 
 export class PriceService {
